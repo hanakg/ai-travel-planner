@@ -74,9 +74,16 @@ model Trip {
 
   title       String
   destination String
+  coverImage  String?
 
   startDate   DateTime
   endDate     DateTime
+
+  arrivalLocation   String?
+  arrivalTime       String?
+
+  departureLocation String?
+  departureTime     String?
 
   travelers   Int
   budget      Decimal  @db.Decimal(10, 2)
@@ -86,6 +93,9 @@ model Trip {
   travelStyle    TravelStyle
   transportation Transportation
   interests      Interest[]
+
+  language TripLanguage @default(EN)
+  notes    String?
 
   status      TripStatus @default(DRAFT)
 
@@ -109,11 +119,7 @@ model TripDay {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  trip       Trip       @relation(
-    fields: [tripId],
-    references: [id],
-    onDelete: Cascade
-  )
+  trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   activities Activity[]
 
@@ -147,11 +153,7 @@ model Activity {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tripDay TripDay @relation(
-    fields: [tripDayId],
-    references: [id],
-    onDelete: Cascade
-  )
+  trip       TripDay       @relation(fields: [tripDayId], references: [id], onDelete: Cascade)
 
   @@index([tripDayId])
 }
@@ -171,11 +173,7 @@ model BudgetItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  trip Trip @relation(
-    fields: [tripId],
-    references: [id],
-    onDelete: Cascade
-  )
+  trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@index([tripId])
 }
@@ -214,6 +212,15 @@ enum Interest {
   SPORTS
 }
 
+enum TripLanguage {
+  EN
+  HU
+  DE
+  ES
+  FR
+  IT
+}
+
 enum ActivityType {
   ATTRACTION
   FOOD
@@ -230,4 +237,11 @@ enum BudgetCategory {
   ACTIVITIES
   TRANSPORT
   OTHER
+}
+
+enum TimeOfDay {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
 }
