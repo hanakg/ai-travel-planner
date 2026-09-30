@@ -11,11 +11,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  //test - remove later
-  session: {
-    expiresIn: 60, // 60 seconds
-    updateAge: 0,
-  },
+
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
