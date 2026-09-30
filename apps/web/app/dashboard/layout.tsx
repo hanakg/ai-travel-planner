@@ -1,11 +1,21 @@
 import { requireSession } from "@/lib/require-session";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default async function ProtectedLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await requireSession();
+  const session = await requireSession();
 
-  return <div>{children}</div>;
+  return (
+    <SidebarProvider>
+      <AppSidebar user={session.user} />
+      <main>
+        <SidebarTrigger />
+        {children}
+      </main>
+    </SidebarProvider>
+  );
 }
