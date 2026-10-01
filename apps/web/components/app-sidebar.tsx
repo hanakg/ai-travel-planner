@@ -14,6 +14,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 
@@ -35,6 +37,7 @@ const navigationItems = [
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { state, toggleSidebar } = useSidebar();
   const initials = user.name
     .split(" ")
     .map((part) => part[0])
@@ -50,20 +53,29 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
-        <Link href="/dashboard" className="flex items-center gap-3">
+      <SidebarHeader className="flex-row items-center justify-between border-b border-sidebar-border px-4 py-5">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-3"
+          onClick={() => {
+            if (state === "collapsed") {
+              toggleSidebar();
+            }
+          }}
+        >
           <Image
             src="/logo.png"
             alt="Travel planner logo"
             width={36}
             height={36}
-            className="size-9 rounded-xl object-cover"
+            className="size-9 rounded-xl object-contain"
             priority
           />
           <span className="text-base font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
             AI Travel Planner
           </span>
         </Link>
+        {state === "expanded" && <SidebarTrigger />}
       </SidebarHeader>
       <SidebarContent className="py-3">
         <SidebarGroup>

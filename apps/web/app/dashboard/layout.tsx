@@ -1,5 +1,5 @@
 import { requireSession } from "@/lib/require-session";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
 export default async function ProtectedLayout({
@@ -13,7 +13,6 @@ export default async function ProtectedLayout({
     <SidebarProvider>
       <AppSidebar user={session.user} />
       <main>
-        <SidebarTrigger />
         {children}
       </main>
     </SidebarProvider>
