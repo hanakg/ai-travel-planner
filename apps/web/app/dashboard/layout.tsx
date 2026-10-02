@@ -12,9 +12,7 @@ export default async function ProtectedLayout({
   return (
     <SidebarProvider>
       <AppSidebar user={session.user} />
-      <main>
-        {children}
-      </main>
+      <main className="flex min-h-screen w-full flex-1">{children}</main>
     </SidebarProvider>
   );
 }
