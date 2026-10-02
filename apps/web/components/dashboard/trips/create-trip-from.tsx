@@ -15,7 +15,6 @@ import {
   TripLanguage,
 } from "@/enums/trip-enums";
 import { generateTripApi } from "@/lib/api/actions";
-import { api } from "@/lib/api/client";
 import { formatLabel } from "@/lib/text-format";
 import { createTripSchema, CreateTripValues } from "@/schemas/trip";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,7 +30,6 @@ import {
   UserRound,
   Wallet,
 } from "lucide-react";
-import { useRef } from "react";
 import {
   Controller,
   FormProvider,
@@ -72,13 +70,6 @@ export const CreateTripFrom = () => {
 
   return (
     <div className="flex flex-col rounded-2xl border bg-white p-7">
-      <Button
-        onClick={() => {
-          api("/trip/cover-image/London").then((res) => console.log(res));
-        }}
-      >
-        TEST
-      </Button>
       <FormProvider {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-6">
