@@ -18,6 +18,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "cn";
 
 type AppSidebarProps = {
   user: {
@@ -53,7 +54,12 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader className="flex-row items-center justify-between border-b border-sidebar-border px-4 py-5">
+      <SidebarHeader
+        className={cn(
+          "border-sidebar-border flex-row items-center justify-between border-b px-4 py-5",
+          state === "collapsed" && "justify-center",
+        )}
+      >
         <Link
           href="/dashboard"
           className="flex items-center gap-3"
@@ -63,15 +69,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
             }
           }}
         >
-          <Image
-            src="/logo.png"
-            alt="Travel planner logo"
-            width={36}
-            height={36}
-            className="size-9 rounded-xl object-contain"
-            priority
-          />
-          <span className="text-base font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
+          <div className="size-8 shrink-0">
+            <Image
+              src="/logo.svg"
+              alt="Travel planner logo"
+              className="size-8 object-contain"
+              width={32}
+              height={32}
+              priority
+            />
+          </div>
+          <span className="text-base font-semibold tracking-tight whitespace-nowrap group-data-[collapsible=icon]:hidden">
             AI Travel Planner
           </span>
         </Link>
@@ -81,10 +89,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         <SidebarGroup>
           <SidebarMenu>
             {navigationItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/dashboard" &&
-                  pathname.startsWith(`${item.href}/`));
+              const isActive = pathname === item.href;
 
               return (
                 <SidebarMenuItem key={item.href}>
@@ -121,13 +126,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   unoptimized
                 />
               ) : (
-                <span className="flex size-8 items-center justify-center rounded-full bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground">
+                <span className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 items-center justify-center rounded-full text-xs font-semibold">
                   {initials || <UserRound />}
                 </span>
               )}
               <span className="flex min-w-0 flex-col items-start gap-0.5 group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="max-w-40 truncate text-xs text-sidebar-foreground/60">
+                <span className="text-sidebar-foreground/60 max-w-40 truncate text-xs">
                   {user.email}
                 </span>
               </span>
