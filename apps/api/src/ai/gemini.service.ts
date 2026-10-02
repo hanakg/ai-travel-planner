@@ -17,7 +17,7 @@ export class GeminiService {
     const jsonSchema = z.toJSONSchema(generatedTripSchema);
 
     const response = await this.ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: prompt,
 
       config: {
