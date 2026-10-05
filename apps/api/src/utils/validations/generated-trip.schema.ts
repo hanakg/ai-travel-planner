@@ -1,5 +1,5 @@
 import { ActivityType, BudgetCategory } from 'generated/prisma/enums';
-import { z } from 'zod';
+import z from 'zod';
 
 export const generatedTripSchema = z.object({
   days: z.array(
