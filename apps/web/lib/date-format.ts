@@ -11,3 +11,12 @@ export const formatDateRange = (from: Date, to: Date) => {
 
   return `${format(from, "MMM d, yyyy")} - ${format(to, "MMM d, yyyy")}`;
 };
+
+export const formatActivityDuration = (totalMinutes: number) => {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) return `${minutes} min`;
+  if (minutes === 0) return `${hours} hours`;
+  return `${hours} hr ${minutes} min`;
+};
