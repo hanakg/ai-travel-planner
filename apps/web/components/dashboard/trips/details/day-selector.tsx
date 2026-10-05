@@ -1,44 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { differenceInDays, eachDayOfInterval, format } from "date-fns";
+import { format } from "date-fns";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import React, { useCallback, useMemo, useState } from "react";
+import React from "react";
 
 type Props = {
-  startDate: Date;
-  endDate: Date;
+  dates: Date[];
+  currentDayNum: number;
+  onDayChange: (dayNum: number) => void;
 };
 
-export const DaySelector: React.FC<Props> = ({ startDate, endDate }) => {
-  const [currentDayNum, setCurrentDayNum] = useState(0);
-
-  const daysNum = useMemo(
-    () => differenceInDays(endDate, startDate) + 1,
-    [endDate, startDate],
-  );
-
-  const dates = useMemo(
-    () =>
-      eachDayOfInterval({
-        start: startDate,
-        end: endDate,
-      }),
-    [startDate, endDate],
-  );
-
-  const currentDay = useMemo(
-    () => dates[currentDayNum],
-    [currentDayNum, dates],
-  );
-
-  const handlePrevDay = useCallback(() => {
-    setCurrentDayNum((prev) => (prev > 0 ? prev - 1 : 0));
-  }, []);
-
-  const handleNextDay = () => {
-    setCurrentDayNum((prev) => (prev < daysNum - 1 ? prev + 1 : prev));
-  };
+export const DaySelector: React.FC<Props> = ({
+  dates,
+  currentDayNum,
+  onDayChange,
+}) => {
+  const currentDay = dates[currentDayNum];
+  const daysNum = dates.length;
 
   return (
     <div className="flex w-full flex-row items-center justify-center rounded-2xl border-2 bg-white p-4">
@@ -47,7 +26,7 @@ export const DaySelector: React.FC<Props> = ({ startDate, endDate }) => {
           className="min-h-9.5 bg-white"
           variant="outline"
           disabled={currentDayNum === 0}
-          onClick={handlePrevDay}
+          onClick={() => onDayChange(currentDayNum - 1)}
         >
           <div className="flex flex-row items-center gap-2">
             <ArrowLeft size={20} />
@@ -63,7 +42,8 @@ export const DaySelector: React.FC<Props> = ({ startDate, endDate }) => {
         <Button
           className="min-h-9.5 bg-white"
           variant="outline"
-          onClick={handleNextDay}
+          disabled={currentDayNum === daysNum - 1}
+          onClick={() => onDayChange(currentDayNum + 1)}
         >
           <div className="flex flex-row items-center gap-2">
             <p className="text-md">Next</p>

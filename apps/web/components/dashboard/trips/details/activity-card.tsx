@@ -10,11 +10,11 @@ import { ChevronDown, GripVertical } from "lucide-react";
 import React from "react";
 
 type Props = {
-  startTime: Date;
-  duration: number;
+  startTime: Date | null;
+  duration: number | null;
   title: string;
-  description: string;
-  estimatedCost: number;
+  description: string | null;
+  estimatedCost: number | null;
   currency: string;
   type: ActivityTypeValue;
   destination: string;
@@ -37,23 +37,33 @@ export const ActivityCard: React.FC<Props> = ({
       <CollapsibleTrigger className="group/activity hover:bg-muted/50 focus-visible:ring-ring grid w-full grid-cols-[auto_auto_1fr_auto] items-center gap-4 p-4.5 text-left focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset">
         <GripVertical size={24} className="text-muted-foreground" />
         <div className="flex flex-col items-center gap-1.5">
-          <div className="rounded-full bg-accent size-auto p-2">
+          <div className="bg-accent size-auto rounded-full p-2">
             <Icon size={20} className="text-accent-foreground" />
           </div>
-          <p className="text-xs text-secondary">{format(startTime, "HH:mm")}</p>
+          {startTime && (
+            <p className="text-secondary text-xs">
+              {format(startTime, "HH:mm")}
+            </p>
+          )}
         </div>
         <div className="min-w-0">
           <p className="truncate font-semibold">{title}</p>
-          <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
-            {description}
-          </p>
+          {description && (
+            <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
+              {description}
+            </p>
+          )}
           <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-            <span>{duration} min</span>
-            <span aria-hidden="true">·</span>
+            {duration !== null && <span>{duration} min</span>}
+            {duration !== null && <span aria-hidden="true">·</span>}
             <span>{destination}</span>
             <span aria-hidden="true">·</span>
             <span>
-              {estimatedCost > 0 ? `${currency} ${estimatedCost}` : "Free"}
+              {estimatedCost === null
+                ? "Cost not estimated"
+                : estimatedCost > 0
+                  ? `${currency} ${estimatedCost}`
+                  : "Free"}
             </span>
           </div>
         </div>
@@ -63,9 +73,11 @@ export const ActivityCard: React.FC<Props> = ({
         />
       </CollapsibleTrigger>
       <CollapsibleContent className="border-t px-4.5 py-4 pl-16">
-        <p className="text-sm leading-relaxed whitespace-pre-line">
-          {description}
-        </p>
+        {description && (
+          <p className="text-sm leading-relaxed whitespace-pre-line">
+            {description}
+          </p>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );
