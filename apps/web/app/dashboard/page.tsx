@@ -5,11 +5,11 @@ import { requireSession } from "@/lib/require-session";
 import { api } from "@/lib/api/client";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { RecentTripResponse } from "@/types/api-response.type";
+import type { RecentTripsResponse } from "@repo/api/types";
 
 export default async function Page() {
   const session = await requireSession();
-  const recentTrips = await api<RecentTripResponse[]>("/trip/recent");
+  const recentTrips = await api<RecentTripsResponse>("/trip/recent");
 
   return (
     <PageContainer>
