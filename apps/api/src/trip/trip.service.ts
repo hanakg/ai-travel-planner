@@ -4,12 +4,20 @@ import {
   CreateTripInput,
   UpdateTripInput,
 } from 'src/utils/validations/trip.schema';
-import { format } from 'date-fns';
+import { differenceInCalendarDays, format } from 'date-fns';
 import { GeminiService } from 'src/ai/gemini.service';
+import { GooglePlacesService } from 'src/google-places/google-places.service';
+import { UnsplashService } from 'src/unsplash/unsplash.service';
+import pLimit from 'p-limit';
 
 @Injectable()
 export class TripService {
-  constructor(private readonly geminiService: GeminiService) {}
+  private readonly limit = pLimit(5);
+  constructor(
+    private readonly geminiService: GeminiService,
+    private readonly googlePlacesService: GooglePlacesService,
+    private readonly unsplashService: UnsplashService,
+  ) {}
 
   async getAllTrips({ userId }: { userId: string }) {
     return prisma.trip.findMany({
@@ -29,8 +37,25 @@ export class TripService {
     });
   }
 
+  async getRecentTrips({ userId }: { userId: string }) {
+    const trips = await prisma.trip.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        destination: true,
+        startDate: true,
+        endDate: true,
+        coverImage: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 4,
+    });
+
+    return trips;
+  }
+
   async getTrip({ id, userId }: { id: string; userId: string }) {
-    return prisma.trip.findUnique({
+    const tripDetails = await prisma.trip.findUnique({
       where: { id, userId },
       include: {
         budgetItems: true,
@@ -44,6 +69,36 @@ export class TripService {
         },
       },
     });
+
+    if (!tripDetails) {
+      return null;
+    }
+
+    const days = tripDetails.days.map((day) => {
+      const totalActivityDurationMin = day.activities.reduce(
+        (total, activity) => total + (activity.durationMin ?? 0),
+        0,
+      );
+
+      return {
+        ...day,
+        activitiesNum: day.activities.length,
+        totalActivityDurationMin,
+      };
+    });
+    const activitiesNum = days.reduce(
+      (total, day) => total + day.activitiesNum,
+      0,
+    );
+
+    return {
+      ...tripDetails,
+      duration:
+        differenceInCalendarDays(tripDetails.endDate, tripDetails.startDate) +
+        1,
+      activitiesNum,
+      days,
+    };
   }
 
   async createTrip({
@@ -99,18 +154,56 @@ export class TripService {
           ]
         }
 `;
-    const generatedTrip = await this.geminiService.generateTrip(prompt);
+    const [generatedTrip, destinationPlaceInfo, destinationImg] =
+      await Promise.all([
+        this.geminiService.generateTrip(prompt),
+        this.googlePlacesService.getPlaceInfo(tripData.destination),
+        this.unsplashService.getDestinationImg(tripData.destination),
+      ]);
+
+    // TODO: google places API - Too Many Request error
+    /*  const activitiesWithPlaceInfo = await Promise.all(
+      generatedTrip.days.map(async (day) => ({
+        ...day,
+        activities: await Promise.all(
+          day.activities.map(async (activity) => {
+            if (activity.type === ActivityType.TRANSPORT) {
+              return {
+                ...activity,
+                placeInfo: null,
+              };
+            }
+
+            const placeInfo = await this.limit(() =>
+              this.googlePlacesService.getPlaceInfo(activity.title),
+            );
+
+            return {
+              ...activity,
+              placeInfo,
+            };
+          }),
+        ),
+      })),
+    ); */
 
     const result = await prisma.$transaction(async (tx) => {
       const trip = await tx.trip.create({
         data: {
           userId,
-          title: `Trip to ${tripData.destination}`,
+          title: `${destinationPlaceInfo?.displayName ?? tripData.destination} Trip`,
+          coverImage: destinationImg?.urls.regular,
           ...tripData,
+          ...(destinationPlaceInfo?.formattedAddress && {
+            destination: destinationPlaceInfo.formattedAddress,
+          }),
         },
       });
 
       for (const [i, day] of generatedTrip.days.entries()) {
+        /* const dayActivitiesWithPlaceInfo =
+          activitiesWithPlaceInfo[i].activities; */
+
         await tx.tripDay.create({
           data: {
             tripId: trip.id,
@@ -119,18 +212,24 @@ export class TripService {
             order: i,
 
             activities: {
-              create: day.activities.map((activity, activityIndex) => ({
-                title: activity.title,
-                description: activity.description,
-                startTime: activity.startTime
-                  ? new Date(`${day.date}T${activity.startTime}:00`)
-                  : null,
-                durationMin: activity.durationMin,
-                type: activity.type,
-                estimatedCost: activity.estimatedCost,
-                currency: trip.currency,
-                order: activityIndex,
-              })),
+              create: /* dayActivitiesWithPlaceInfo */ day.activities.map(
+                (activity, activityIndex) => ({
+                  title: activity.title,
+                  description: activity.description,
+                  startTime: activity.startTime
+                    ? new Date(`${day.date}T${activity.startTime}:00`)
+                    : null,
+                  durationMin: activity.durationMin,
+                  type: activity.type,
+                  estimatedCost: activity.estimatedCost,
+                  currency: trip.currency,
+                  order: activityIndex,
+                  /* googleMapsUrl: activity.placeInfo?.googleMapsUrl,
+                  websiteUrl: activity.placeInfo?.url,
+                  latitude: activity.placeInfo?.coordinates.latitude,
+                  longitude: activity.placeInfo?.coordinates.longitude, */
+                }),
+              ),
             },
           },
         });

@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { TripService } from './trip.service';
 import { TripController } from './trip.controller';
 import { AiModule } from 'src/ai/ai.module';
+import { GooglePlacesModule } from 'src/google-places/google-places.module';
+import { UnsplashModule } from 'src/unsplash/unsplash.module';
 
 @Module({
-  imports: [AiModule],
+  imports: [AiModule, GooglePlacesModule, UnsplashModule],
   controllers: [TripController],
   providers: [TripService],
 })

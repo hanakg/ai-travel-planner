@@ -13,9 +13,11 @@ import {
   createTripSchema,
   type UpdateTripInput,
   type CreateTripInput,
+  createTripJsonSchema,
 } from 'src/utils/validations/trip.schema';
 import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('trip')
 export class TripController {
@@ -26,15 +28,22 @@ export class TripController {
     return this.tripService.getAllTrips({ userId: session.user.id });
   }
 
+  @Get('/recent')
+  getRecentTrips(@Session() session: UserSession) {
+    return this.tripService.getRecentTrips({ userId: session.user.id });
+  }
+
   @Get(':id')
   getTrip(@Session() session: UserSession, @Param('id') id: string) {
     return this.tripService.getTrip({ id, userId: session.user.id });
   }
 
   @Post('/create')
+  @ApiBody({ schema: createTripJsonSchema })
   createTrip(
     @Session() session: UserSession,
-    @Body(new ZodValidationPipe(createTripSchema)) data: CreateTripInput,
+    @Body(new ZodValidationPipe(createTripSchema))
+    data: CreateTripInput,
   ) {
     return this.tripService.createTrip({
       tripData: data,
