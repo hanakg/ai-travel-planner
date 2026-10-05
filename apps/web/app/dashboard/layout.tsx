@@ -1,11 +1,18 @@
 import { requireSession } from "@/lib/require-session";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default async function ProtectedLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await requireSession();
+  const session = await requireSession();
 
-  return <div>{children}</div>;
+  return (
+    <SidebarProvider>
+      <AppSidebar user={session.user} />
+      <main className="flex min-h-screen w-full flex-1">{children}</main>
+    </SidebarProvider>
+  );
 }

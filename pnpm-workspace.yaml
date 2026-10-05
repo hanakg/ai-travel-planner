@@ -2,10 +2,13 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
+  '@google/genai': true
   '@parcel/watcher': true
   '@prisma/engines': true
+  '@scarf/scarf': true
   esbuild: true
   msgpackr-extract: true
   prisma: true
+  protobufjs: true
   unrs-resolver: true
   workerd: true
